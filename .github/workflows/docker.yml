@@ -123,6 +123,10 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          # PR images are never pushed: skip fat LTO (about 55 of 92 min). main and tags keep it.
+          build-args: |
+            CARGO_PROFILE_RELEASE_LTO=${{ github.event_name == 'pull_request' && 'off' || 'true' }}
+            CARGO_PROFILE_RELEASE_CODEGEN_UNITS=${{ github.event_name == 'pull_request' && '16' || '1' }}
           # The cargo-chef dependency layers are multi-GB; stored as gha
           # cache they blew the 10GB Actions cache quota and kept evicting
           # the Rust and coverage target caches (cold rebuilds everywhere).
